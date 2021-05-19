@@ -22,7 +22,7 @@ void my_init(){
 
     // Initialize command buffer
     // THIS LINE CAUSES CRASH
-    // gd->gcb = gs_command_buffer_new();
+    gd->gcb = gs_command_buffer_new();
     // gd->gsi = gs_immediate_draw_new();
 
 }
