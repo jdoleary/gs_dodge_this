@@ -29,11 +29,14 @@ void init()
     gs_graphics_texture_desc_t desc = {0};
     gs_asset_texture_load_from_file("./assets/champ.png", &tex, NULL, true, false);
 }
-
+double duration = 0;
 void update()
 {
     if (gs_platform_key_pressed(GS_KEYCODE_ESC)) gs_engine_quit();
 
+    gs_platform_t* platform = gs_engine_subsystem(platform);
+    duration += platform->time.delta;
+        gs_println("time: %f, %f", 1/platform->time.delta, duration);
     // // Set up 2D camera for projection matrix
     // gsi_camera2D(&gsi);
 
