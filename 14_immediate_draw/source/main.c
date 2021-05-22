@@ -63,13 +63,13 @@ void update()
     gsi_camera2D(&gsi);
     gsi_push_matrix(&gsi, GSI_MATRIX_MODELVIEW);
     {
-        // gsi_transf(&gsi, -2.f, -1.f, -5.f);
         // gsi_rotatefv(&gsi, gs_platform_elapsed_time() * 0.001f, GS_YAXIS);
-        // gsi_rotatefv(&gsi, gs_platform_elapsed_time() * 0.0005f, GS_ZAXIS);
+        gsi_transf(&gsi, 200.f, 200.f, 0.f);
+        gsi_rotatefv(&gsi, gs_platform_elapsed_time() * 0.005f, GS_ZAXIS);
         gsi_texture(&gsi, tex.hndl);
         // gsi_scalef(&gsi, 1.5f, 1.5f, 1.5f);
         // gsi_box(&gsi, 0.f, 0.f, 0.f, 0.5f, 0.5f, 0.5f, 255, 255, 255, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
-    gsi_rectv(&gsi, gs_v2(300.f, 100.f), gs_v2(350.f, 50.f), GS_COLOR_WHITE, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
+    gsi_rectv(&gsi, gs_v2(-50.f, -50.f), gs_v2(50.f, 50.f), GS_COLOR_WHITE, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
         gsi_texture(&gsi, (gs_handle(gs_graphics_texture_t)){0});
     }
     gsi_pop_matrix(&gsi);
