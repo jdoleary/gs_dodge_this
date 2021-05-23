@@ -31,16 +31,22 @@ void init()
     gs_asset_texture_load_from_file("./assets/champ.png", &tex, NULL, true, false);
 
 }
-float heroSpeed = 10.f;
+float get_distance(gs_vec2* a, gs_vec2* b){
+    f32 xDelta = (a->x-b->x);
+    f32 yDelta = (a->y-b->y);
+        gs_println("deltas: %f, %f, %f", xDelta, yDelta, sqrt(xDelta*xDelta + yDelta*yDelta));
+    return sqrt(xDelta*xDelta + yDelta*yDelta);
+}
 void moveToTarget(gs_vec2* self, gs_vec2 target) {
+    float speed = gs_interp_linear(0.f,10.f, get_distance(self, &target)/300.f);
     float bigA = target.x - self->x;
     float bigB = target.y - self->y;
     double bigC = sqrt(bigA*bigA + bigB*bigB);
-    if(bigC < heroSpeed){
+    if(bigC < speed){
         return;
     }
-    float a = heroSpeed*bigA/bigC;
-    float b = heroSpeed*bigB/bigC;
+    float a = speed*bigA/bigC;
+    float b = speed*bigB/bigC;
     self->x += a;
     self->y += b;
 }
@@ -49,6 +55,7 @@ float size = 200;
 float speed = 10.f;
 gs_vec2 camPos = {0,0};
 gs_vec2 heroPos = {0,0};
+
 void update()
 {
     if (gs_platform_key_pressed(GS_KEYCODE_ESC)) gs_engine_quit();
