@@ -61,17 +61,28 @@ void update()
     if (gs_platform_key_pressed(GS_KEYCODE_ESC)) gs_engine_quit();
 
 	gs_vec2 screenSize = gs_platform_window_sizev(gs_platform_main_window());
-    // gs_println("screen size: %f, %f", screenSize.x, screenSize.y);
+
+    // gs_println("screen size: %f, %f", screenSize.x / 10.f, screenSize.y);
     camPos = gs_vec2_mul(heroPos, gs_v2(-1,-1));
     camPos = gs_vec2_add(camPos, gs_vec2_div(screenSize, gs_v2(2,2)));
-    //     gs_println("camPos: %f, %f", camPos.x, camPos.y);
+        // gs_println("camPos: %f, %d", camPos.x, (int)camPos.x % 10);
 
     // Set up 2D camera for projection matrix
     gsi_camera2D(&gsi);
 
+    // Draw grid in objective space so player knows how much they're moving
+    int skipAmount = 200;
+    for(int i = 0; i <= (int)screenSize.x; i += skipAmount){
+        float x = (int)camPos.x % skipAmount + i;
+        float y = (int)camPos.y % skipAmount + i;
+        gsi_linev(&gsi, gs_v2(x, 0.f), gs_v2(x, screenSize.y), gs_color(0, 255, 0, 255));
+        gsi_linev(&gsi, gs_v2(0.f, y), gs_v2(screenSize.x, y), gs_color(0, 255, 0, 255));
+    }
+
     const gs_vec2 screenMousePos = gs_platform_mouse_positionv();
     const gs_vec2 objectiveMousePos = gs_vec2_sub(screenMousePos, camPos);
-        gs_println("obj mouse pos: %f, %f", objectiveMousePos.x, objectiveMousePos.y);
+        // gs_println("obj mouse pos: %f, %f", objectiveMousePos.x, objectiveMousePos.y);
+
     // Move hero to pointer
     moveToTarget(&heroPos, objectiveMousePos);
    
@@ -79,7 +90,7 @@ void update()
     // Translate everything to inverse of camera to simulate "camera" motion
     gsi_transf(&gsi, camPos.x, camPos.y, 0.f);
 
-    gsi_rectv(&gsi, gs_v2(0.f, 0.f), screenSize, GS_COLOR_GREEN, GS_GRAPHICS_PRIMITIVE_LINES);
+    gsi_rectv(&gsi, gs_v2(0.f, 0.f), screenSize, GS_COLOR_RED, GS_GRAPHICS_PRIMITIVE_LINES);
     gsi_circle(&gsi, heroPos.x, heroPos.y, 50.f, 20, 100, 150, 220, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     // gs_println("hero pos: %f, %f", heroPos.x, heroPos.y);
     gsi_pop_matrix(&gsi);
