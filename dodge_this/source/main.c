@@ -54,8 +54,8 @@ void init()
 
     gs_asset_font_load_from_file("./assets/font.ttf", &font, 48);
 
-    gs_graphics_texture_desc_t desc = {0};
-    gs_asset_texture_load_from_file("./assets/champ.png", &tex, NULL, true, false);
+    // gs_graphics_texture_desc_t desc = {0};
+    // gs_asset_texture_load_from_file("./assets/champ.png", &tex, NULL, true, false);
 
     // Init enemies
     int number_of_enemies = 10;
@@ -73,11 +73,10 @@ void init()
 float get_distance(gs_vec2* a, gs_vec2* b){
     f32 xDelta = (a->x-b->x);
     f32 yDelta = (a->y-b->y);
-        // gs_println("deltas: %f, %f, %f", xDelta, yDelta, sqrt(xDelta*xDelta + yDelta*yDelta));
     return sqrt(xDelta*xDelta + yDelta*yDelta);
 }
 void moveToTargetDynamicSpeed(gs_vec2* self, gs_vec2 target) {
-    float speed = gs_interp_linear(0.f,10.f, get_distance(self, &target)/300.f);
+    float speed = gs_interp_linear(0.f,20.f, get_distance(self, &target)/300.f);
     float bigA = target.x - self->x;
     float bigB = target.y - self->y;
     double bigC = sqrt(bigA*bigA + bigB*bigB);
@@ -111,10 +110,8 @@ void update()
 
 	gs_vec2 screenSize = gs_platform_window_sizev(gs_platform_main_window());
 
-    // gs_println("screen size: %f, %f", screenSize.x / 10.f, screenSize.y);
     camPos = gs_vec2_mul(heroPos, gs_v2(-1,-1));
     camPos = gs_vec2_add(camPos, gs_vec2_div(screenSize, gs_v2(2,2)));
-        // gs_println("camPos: %f, %d", camPos.x, (int)camPos.x % 10);
 
     // Set up 2D camera for projection matrix
     gsi_camera2D(&gsi);
@@ -130,7 +127,6 @@ void update()
 
     const gs_vec2 screenMousePos = gs_platform_mouse_positionv();
     const gs_vec2 objectiveMousePos = gs_vec2_sub(screenMousePos, camPos);
-        // gs_println("obj mouse pos: %f, %f", objectiveMousePos.x, objectiveMousePos.y);
 
    
     gsi_push_matrix(&gsi, GSI_MATRIX_MODELVIEW);
@@ -179,7 +175,7 @@ void update()
     // Move hero to pointer
     moveToTargetDynamicSpeed(&heroPos, objectiveMousePos);
     // Draw hero
-    gsi_circle(&gsi, heroPos.x, heroPos.y, 50.f, 20, 100, 150, 220, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
+    gsi_circle(&gsi, heroPos.x, heroPos.y, 50.f, 20, 0, 255, 0, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     // gs_println("hero pos: %f, %f", heroPos.x, heroPos.y);
     gsi_pop_matrix(&gsi);
 
