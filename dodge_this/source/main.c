@@ -33,6 +33,20 @@ typedef struct {
 gs_dyn_array(Enemy) enemies = NULL;
 gs_vec2 camPos = {0,0};
 gs_vec2 heroPos = {0,0};
+gs_vec2 get_point_within_distance(gs_vec2 origin, int distance){
+    gs_vec2 point = gs_vec2_ctor(stb_frand()*distance*2-distance,stb_frand()*distance*2-distance);
+    return gs_vec2_add(origin, point);
+}
+makeEnemy(short t){
+    f32 spawn_radius = 1000.f;
+        Enemy enemy;
+        enemy.pos = gs_vec2_ctor(stb_frand()*spawn_radius,stb_frand()*spawn_radius);
+        enemy.type = t;
+        enemy.target = enemy.pos;
+
+        gs_dyn_array_push(enemies, enemy);
+}
+
 void init()
 {
     cb = gs_command_buffer_new(); 
@@ -44,15 +58,15 @@ void init()
     gs_asset_texture_load_from_file("./assets/champ.png", &tex, NULL, true, false);
 
     // Init enemies
-    f32 spawn_radius = 1000.f;
     int number_of_enemies = 10;
     for(int i = 0; i < number_of_enemies; i++){
-        Enemy enemy;
-        enemy.pos = gs_vec2_ctor(stb_frand()*spawn_radius,stb_frand()*spawn_radius);
-        enemy.type = 1;
-        enemy.target = gs_vec2_ctor(0,0);
-
-        gs_dyn_array_push(enemies, enemy);
+        makeEnemy(1);
+    }
+    for(int i = 0; i < number_of_enemies; i++){
+        makeEnemy(2);
+    }
+    for(int i = 0; i < number_of_enemies; i++){
+        makeEnemy(3);
     }
 
 }
@@ -62,7 +76,7 @@ float get_distance(gs_vec2* a, gs_vec2* b){
         // gs_println("deltas: %f, %f, %f", xDelta, yDelta, sqrt(xDelta*xDelta + yDelta*yDelta));
     return sqrt(xDelta*xDelta + yDelta*yDelta);
 }
-void moveToTarget(gs_vec2* self, gs_vec2 target) {
+void moveToTargetDynamicSpeed(gs_vec2* self, gs_vec2 target) {
     float speed = gs_interp_linear(0.f,10.f, get_distance(self, &target)/300.f);
     float bigA = target.x - self->x;
     float bigB = target.y - self->y;
@@ -74,6 +88,21 @@ void moveToTarget(gs_vec2* self, gs_vec2 target) {
     float b = speed*bigB/bigC;
     self->x += a;
     self->y += b;
+}
+bool moveToTarget(gs_vec2* self, gs_vec2 target, int speed) {
+    float bigA = target.x - self->x;
+    float bigB = target.y - self->y;
+    double bigC = sqrt(bigA*bigA + bigB*bigB);
+    if(bigC < speed){
+        // Reached target
+        return true;
+    }
+    float a = speed*bigA/bigC;
+    float b = speed*bigB/bigC;
+    self->x += a;
+    self->y += b;
+    // Haven't yet reached target
+    return false;
 }
 
 void update()
@@ -114,13 +143,41 @@ void update()
     // Draw enemies
     for (uint32_t i = 0; i < gs_dyn_array_size(enemies); ++i) {     // Iterate size of array, access elements via index `i`
         Enemy* e = &enemies[i];
-        moveToTarget(&e->pos, heroPos);
-        gsi_circle(&gsi, e->pos.x, e->pos.y, 50.f, 20, 255, 0, 0, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
+        short r = 0;
+        short g = 0;
+        short b = 0;
+        int speed = 2;
+        switch(e->type) {
+            case 1:
+            // Wanderer
+            r = 255;
+            g = 150;
+            break;
+            case 2:
+            // Chaser
+            r = 255;
+            e->target = heroPos;
+            speed = 2;
+            break;
+            case 3:
+            // Fleer
+            b = 255;
+            break;
+        }
+        bool reachedTarget = moveToTarget(&e->pos, e->target, speed);
+        if(reachedTarget){
+            if(e->type == 1){
+                // Pick random wander target:
+                e->target = get_point_within_distance(e->pos, 1000);
+            gs_println("wander pos: %f, %f", e->target.x, e->target.y);
+            }
+        }
+        gsi_circle(&gsi, e->pos.x, e->pos.y, 50.f, 20, r, g, b, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     }
 
 // HERO
     // Move hero to pointer
-    moveToTarget(&heroPos, objectiveMousePos);
+    moveToTargetDynamicSpeed(&heroPos, objectiveMousePos);
     // Draw hero
     gsi_circle(&gsi, heroPos.x, heroPos.y, 50.f, 20, 100, 150, 220, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     // gs_println("hero pos: %f, %f", heroPos.x, heroPos.y);
