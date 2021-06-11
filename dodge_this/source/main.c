@@ -1,13 +1,3 @@
-/*================================================================
-    * Copyright: 2020 John Jackson
-    * immediate_draw
-
-    The purpose of this example is to demonstrate how to use the optional 
-    immediate drawing utility, mainly to be used for quick debug rendering.
-
-    Press `esc` to exit the application.
-================================================================*/
-
 #define GS_IMPL
 #include <gs/gs.h>
 #include <math.h>       // sqrt
