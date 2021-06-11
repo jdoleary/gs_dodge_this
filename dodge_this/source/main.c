@@ -23,6 +23,14 @@ gs_asset_texture_t   tex  = {0};
 double duration = 0;
 float size = 200;
 float speed = 10.f;
+
+typedef struct {
+    gs_vec2 pos;
+    small type;
+    gs_vec2 target;
+} Enemy;
+
+gs_dyn_array(Enemy) enemies = NULL;
 gs_vec2 camPos = {0,0};
 gs_vec2 heroPos = {0,0};
 void init()
@@ -34,6 +42,18 @@ void init()
 
     gs_graphics_texture_desc_t desc = {0};
     gs_asset_texture_load_from_file("./assets/champ.png", &tex, NULL, true, false);
+
+    // Init enemies
+    f32 spawn_radius = 1000.f;
+    int number_of_enemies = 10;
+    for(int i = 0; i < number_of_enemies; i++){
+        Enemy enemy;
+        enemy.pos = gs_vec2_ctor(stb_frand()*spawn_radius,stb_frand()*spawn_radius);
+        enemy.type = 1;
+        enemy.target = gs_vec2_ctor(0,0);
+
+        gs_dyn_array_push(enemies, enemy);
+    }
 
 }
 float get_distance(gs_vec2* a, gs_vec2* b){
@@ -83,14 +103,25 @@ void update()
     const gs_vec2 objectiveMousePos = gs_vec2_sub(screenMousePos, camPos);
         // gs_println("obj mouse pos: %f, %f", objectiveMousePos.x, objectiveMousePos.y);
 
-    // Move hero to pointer
-    moveToTarget(&heroPos, objectiveMousePos);
    
     gsi_push_matrix(&gsi, GSI_MATRIX_MODELVIEW);
     // Translate everything to inverse of camera to simulate "camera" motion
     gsi_transf(&gsi, camPos.x, camPos.y, 0.f);
 
     gsi_rectv(&gsi, gs_v2(0.f, 0.f), screenSize, GS_COLOR_RED, GS_GRAPHICS_PRIMITIVE_LINES);
+
+
+    // Draw enemies
+    for (uint32_t i = 0; i < gs_dyn_array_size(enemies); ++i) {     // Iterate size of array, access elements via index `i`
+        Enemy* e = &enemies[i];
+        moveToTarget(&e->pos, heroPos);
+        gsi_circle(&gsi, e->pos.x, e->pos.y, 50.f, 20, 255, 0, 0, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
+    }
+
+// HERO
+    // Move hero to pointer
+    moveToTarget(&heroPos, objectiveMousePos);
+    // Draw hero
     gsi_circle(&gsi, heroPos.x, heroPos.y, 50.f, 20, 100, 150, 220, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     // gs_println("hero pos: %f, %f", heroPos.x, heroPos.y);
     gsi_pop_matrix(&gsi);
