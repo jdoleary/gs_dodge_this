@@ -218,20 +218,24 @@ void update()
             // Chaser
             r = 255;
             g = 100;
+            enemySpeed = 2;
             if(get_distance(&e->pos, &hero.pos) < agro_radius){
                 e->target = hero.pos;
                 g = 0;
+                enemySpeed = 4;
             }
-            enemySpeed = 2;
             break;
             case 3:
             // Fleer
             b = 255;
             if(get_distance(&e->pos, &hero.pos) < agro_radius){
-                e->target = hero.pos;
+                // Run away from hero
+                e->target = gs_vec2_sub(e->pos, gs_vec2_sub(hero.pos, e->pos));
                 b = 255;
                 g = 100;
                 r = 100;
+                // Run away faster
+                enemySpeed = 4;
             }
             break;
         }
