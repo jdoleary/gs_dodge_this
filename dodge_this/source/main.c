@@ -303,23 +303,30 @@ void update()
                 if(e->type == 3){
                     // Fleer
                     hero_health += 1;
-                    // Gain score
-                    score++;
-                    // Add another unit:
-                    make_random_unit();
-                    // Cap health at no greater than max
-                    if(hero_health >= HERO_MAX_HEALTH){
-                        hero_health = HERO_MAX_HEALTH;
-                    }
                     // "Respawn" fleer:
                     e->pos = get_point_between_bounds();
+                    if(hero_health >= 2){
+                        // Gain score
+                        score++;
+                        // Add another unit:
+                        make_random_unit();
+                        // Cap health at no greater than max
+                        if(hero_health >= HERO_MAX_HEALTH){
+                            hero_health = HERO_MAX_HEALTH;
+                        }
+                    }
 
                     // Play sound
-                    gs_asset_audio_t* ap = gs_assets_getp(&gsa, gs_asset_audio_t, aud_hndl);
-                    gs_audio_play_source(ap->hndl, 0.5f);
+                    // FIXME: It crashes occasionally when sound is used
+                    // gs_asset_audio_t* ap = gs_assets_getp(&gsa, gs_asset_audio_t, aud_hndl);
+                    // gs_audio_play_source(ap->hndl, 0.5f);
                 }else {
                     hero_health -= 1;
-                    // add_velocity_away(&hero, e->pos);
+                    // Clamp hero health to 0
+                    if(hero_health < 0){
+                        hero_health = 0;
+                    }
+                    add_velocity_away(&hero, e->pos);
                     add_velocity_away(e, hero.pos);
 
                 }
