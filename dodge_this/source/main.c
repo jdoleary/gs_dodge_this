@@ -11,8 +11,8 @@ gs_asset_font_t      font = {0};
 gs_asset_texture_t   tex  = {0};
 
 double duration = 0;
-float size = 200;
 float speed = 10.f;
+f32 unit_size = 50.f;
 
 #define arena_size 1000
 gs_vec2 arena_upper_left = {-arena_size, -arena_size};
@@ -129,6 +129,13 @@ void use_velocity(Unit* unit){
         }
     }
 }
+bool areUnitsColliding(Unit* a, Unit* b){
+    if(get_distance(&a->pos, &b->pos) <= unit_size*2){
+        return true;
+    }
+    return false;
+
+}
 void moveToTargetDynamicSpeed(gs_vec2* self, gs_vec2 target) {
     float speed = gs_interp_linear(0.f,20.f, get_distance(self, &target)/300.f);
     float bigA = target.x - self->x;
@@ -234,7 +241,7 @@ void update()
                 e->target = get_point_within_distance(e->pos, 1000);
             }
         }
-        gsi_circle(&gsi, e->pos.x, e->pos.y, 50.f, 20, r, g, b, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
+        gsi_circle(&gsi, e->pos.x, e->pos.y, unit_size, 20, r, g, b, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     }
 
     // HERO
@@ -243,7 +250,7 @@ void update()
     add_velocity_if_out_of_arena(&hero);
     use_velocity(&hero);
     // Draw hero
-    gsi_circle(&gsi, hero.pos.x, hero.pos.y, 50.f, 20, 0, 255, 0, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
+    gsi_circle(&gsi, hero.pos.x, hero.pos.y, unit_size, 20, 0, 255, 0, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     // gs_println("hero pos: %f, %f", heroPos.x, heroPos.y);
 
     gsi_pop_matrix(&gsi);
