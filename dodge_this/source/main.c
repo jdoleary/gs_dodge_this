@@ -62,8 +62,6 @@ void init()
 
     gs_asset_font_load_from_file("./assets/font.ttf", &font, 48);
 
-    // gs_graphics_texture_desc_t desc = {0};
-    // gs_asset_texture_load_from_file("./assets/champ.png", &tex, NULL, true, false);
     // Init hero
     hero.pos = gs_vec2_ctor(0,0);
     hero.type = 0;
