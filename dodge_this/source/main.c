@@ -216,7 +216,7 @@ void update()
         short r = 0;
         short g = 0;
         short b = 0;
-        int speed = 2;
+        int enemySpeed = 2;
         switch(e->type) {
             case 1:
             // Wanderer
@@ -227,14 +227,14 @@ void update()
             // Chaser
             r = 255;
             e->target = hero.pos;
-            speed = 2;
+            enemySpeed = 2;
             break;
             case 3:
             // Fleer
             b = 255;
             break;
         }
-        bool reachedTarget = moveToTarget(&e->pos, e->target, speed);
+        bool reachedTarget = moveToTarget(&e->pos, e->target, enemySpeed);
         if(reachedTarget){
             if(e->type == 1){
                 // Pick random wander target:
