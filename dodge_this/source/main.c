@@ -226,8 +226,10 @@ void update()
         }
         // Test collisions with hero:
         if(areUnitsColliding(e, &hero)){
-            add_velocity_away(&hero, e->pos);
+            // add_velocity_away(&hero, e->pos);
+            add_velocity_away(e, hero.pos);
         }
+        use_velocity(e);
 
         gsi_circle(&gsi, e->pos.x, e->pos.y, unit_size, 20, r, g, b, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     }
