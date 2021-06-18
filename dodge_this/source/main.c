@@ -155,7 +155,7 @@ bool moveToTarget(gs_vec2* self, gs_vec2 target, int speed) {
     // Haven't yet reached target
     return false;
 }
-
+int agro_radius = 300;
 void update()
 {
     if (gs_platform_key_pressed(GS_KEYCODE_ESC)) gs_engine_quit();
@@ -217,12 +217,22 @@ void update()
             case 2:
             // Chaser
             r = 255;
-            e->target = hero.pos;
+            g = 100;
+            if(get_distance(&e->pos, &hero.pos) < agro_radius){
+                e->target = hero.pos;
+                g = 0;
+            }
             enemySpeed = 2;
             break;
             case 3:
             // Fleer
             b = 255;
+            if(get_distance(&e->pos, &hero.pos) < agro_radius){
+                e->target = hero.pos;
+                b = 255;
+                g = 100;
+                r = 100;
+            }
             break;
         }
         bool reachedTarget = moveToTarget(&e->pos, e->target, enemySpeed);
