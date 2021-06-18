@@ -227,10 +227,8 @@ void update()
         }
         bool reachedTarget = moveToTarget(&e->pos, e->target, enemySpeed);
         if(reachedTarget){
-            if(e->type == 1){
-                // Pick random wander target:
-                e->target = get_point_between_bounds(e->pos);
-            }
+            // Pick random wander target:
+            e->target = get_point_between_bounds(e->pos);
         }
         // Test collisions with hero:
         if(areUnitsColliding(e, &hero)){
