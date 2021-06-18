@@ -91,7 +91,7 @@ float get_distance(gs_vec2* a, gs_vec2* b){
     f32 yDelta = (a->y-b->y);
     return sqrt(xDelta*xDelta + yDelta*yDelta);
 }
-f32 bounce_velocity = 12.f;
+f32 bounce_velocity = 20.f;
 void add_velocity_away(Unit* forUnit, gs_vec2 from){
     float bigA = from.x - forUnit->pos.x;
     float bigB = from.y - forUnit->pos.y;
