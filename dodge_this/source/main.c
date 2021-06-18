@@ -226,7 +226,7 @@ void update()
         }
         // Test collisions with hero:
         if(areUnitsColliding(e, &hero)){
-            // add_velocity_away(&hero, e->pos);
+            add_velocity_away(&hero, e->pos);
             add_velocity_away(e, hero.pos);
         }
         use_velocity(e);
