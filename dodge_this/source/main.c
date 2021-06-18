@@ -77,7 +77,7 @@ float get_distance(gs_vec2* a, gs_vec2* b){
     f32 yDelta = (a->y-b->y);
     return sqrt(xDelta*xDelta + yDelta*yDelta);
 }
-f32 bounce_velocity = 8.f;
+f32 bounce_velocity = 12.f;
 void add_velocity_away(Unit* forUnit, gs_vec2 from){
     float bigA = from.x - forUnit->pos.x;
     float bigB = from.y - forUnit->pos.y;
@@ -103,40 +103,14 @@ void doArenaBorderCollisions(Unit* unit){
     }
 }
 // Reduces velocity per tick
-f32 drag = 1.f;
+f32 drag = 0.94f;
 void use_velocity(Unit* unit){
     unit->pos.x += unit->vel.x;
     unit->pos.y += unit->vel.y;
 
-    // Apply drag to velocity
-    if(unit->vel.x > 0){
-        unit->vel.x -= drag;
-        // Ensure velocity doesn't go below 0
-        if(unit->vel.x < 0){
-            unit->vel.x = 0;
-        }
-    }
-    if(unit->vel.x < 0){
-        unit->vel.x += drag;
-        // Ensure velocity doesn't go above 0
-        if(unit->vel.x > 0){
-            unit->vel.x = 0;
-        }
-    }
-    if(unit->vel.y > 0){
-        unit->vel.y -= drag;
-        // Ensure velocity doesn't go below 0
-        if(unit->vel.y < 0){
-            unit->vel.y = 0;
-        }
-    }
-    if(unit->vel.y < 0){
-        unit->vel.y += drag;
-        // Ensure velocity doesn't go above 0
-        if(unit->vel.y > 0){
-            unit->vel.y = 0;
-        }
-    }
+    unit->vel.x *= drag;
+    unit->vel.y *= drag;
+
 }
 bool areUnitsColliding(Unit* a, Unit* b){
     if(get_distance(&a->pos, &b->pos) <= unit_size*2){
