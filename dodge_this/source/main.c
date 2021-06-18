@@ -5,9 +5,12 @@
 #define GS_IMMEDIATE_DRAW_IMPL
 #include <gs/util/gs_idraw.h>
 
+#define GS_ASSET_IMPL
+#include <gs/util/gs_asset.h>
+
 gs_command_buffer_t  cb   = {0};
 gs_immediate_draw_t  gsi  = {0};
-gs_asset_font_t      font = {0};
+gs_asset_manager_t   gsa = {0};
 gs_asset_texture_t   tex  = {0};
 
 double duration = 0;
@@ -64,12 +67,18 @@ makeUnit(short t){
     gs_dyn_array_push(enemies, enemy);
 }
 
+gs_asset_t aud_hndl = {0};
 void init()
 {
+
     cb = gs_command_buffer_new(); 
     gsi = gs_immediate_draw_new();
+    gsa = gs_asset_manager_new();
 
-    gs_asset_font_load_from_file("./assets/font.ttf", &font, 48);
+    // Load audio
+    gs_asset_audio_t   aud_hit   = {0};
+    gs_asset_audio_load_from_file("./assets/jump.wav", &aud_hit);
+    aud_hndl = gs_assets_create_asset(&gsa, gs_asset_audio_t, &aud_hit);
 
     // Init hero
     hero.pos = gs_vec2_ctor(0,0);
@@ -290,6 +299,10 @@ void update()
                     }
                     // "Respawn" fleer:
                     e->pos = get_point_between_bounds();
+
+                    // Play sound
+                    gs_asset_audio_t* ap = gs_assets_getp(&gsa, gs_asset_audio_t, aud_hndl);
+                    gs_audio_play_source(ap->hndl, 0.5f);
                 }else {
                     hero_health -= 1;
                     add_velocity_away(&hero, e->pos);
