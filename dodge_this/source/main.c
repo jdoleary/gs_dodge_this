@@ -287,9 +287,8 @@ void update()
                     if(hero_health >= HERO_MAX_HEALTH){
                         hero_health = HERO_MAX_HEALTH;
                     }
-                    // "Respawn" fleer on opposize size of map:
-                    e->pos.x = -e->pos.x;
-                    e->pos.y = -e->pos.y;
+                    // "Respawn" fleer:
+                    e->pos = get_point_between_bounds();
                 }else {
                     hero_health -= 1;
                     add_velocity_away(&hero, e->pos);
