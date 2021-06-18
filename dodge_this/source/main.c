@@ -68,15 +68,21 @@ void init()
     
 
     // Init enemies
-    int number_of_enemies = 10;
-    for(int i = 0; i < number_of_enemies; i++){
+    int number_of_wanderers = 10;
+    int number_of_chasers = 4;
+    int number_of_fleers = 7;
+    int number_of_mimics = 1;
+    for(int i = 0; i < number_of_wanderers; i++){
         makeUnit(1);
     }
-    for(int i = 0; i < number_of_enemies; i++){
+    for(int i = 0; i < number_of_chasers; i++){
         makeUnit(2);
     }
-    for(int i = 0; i < number_of_enemies; i++){
+    for(int i = 0; i < number_of_fleers; i++){
         makeUnit(3);
+    }
+    for(int i = 0; i < number_of_mimics; i++){
+        makeUnit(4);
     }
 
 }
@@ -235,6 +241,18 @@ void update()
                 g = 100;
                 r = 100;
                 // Run away faster
+                enemySpeed = 4;
+            }
+            break;
+            case 4:
+            // Mimic
+            b = 255;
+            if(get_distance(&e->pos, &hero.pos) < agro_radius){
+                // Chase hero
+                e->target = hero.pos;
+                // Turn red
+                r = 255;
+                b = 255;
                 enemySpeed = 4;
             }
             break;
