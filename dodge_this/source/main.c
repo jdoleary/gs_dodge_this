@@ -14,6 +14,7 @@ double duration = 0;
 float speed = 10.f;
 f32 unit_size = 50.f;
 int score = 0;
+int agro_radius = 300;
 
 enum gameStates{Pre, Playing} gameState;
 gameState = Pre;
@@ -34,6 +35,11 @@ Unit hero;
 #define HERO_MAX_HEALTH 10
 int hero_health = HERO_MAX_HEALTH;
 
+float get_distance(gs_vec2 a, gs_vec2 b){
+    f32 xDelta = (a.x-b.x);
+    f32 yDelta = (a.y-b.y);
+    return sqrt(xDelta*xDelta + yDelta*yDelta);
+}
 float lerp(float t, float a, float b ){
     return (1-t)*a + t*b;
 }
@@ -47,7 +53,10 @@ gs_vec2 get_point_between_bounds(){
 makeUnit(short t){
     f32 spawn_radius = 1000.f;
     Unit enemy;
-    enemy.pos = get_point_between_bounds();
+    // Spawn enemy (but not too close to hero)
+    do {
+        enemy.pos = get_point_between_bounds();
+    } while(get_distance(enemy.pos, hero.pos) <= agro_radius);
     enemy.type = t;
     enemy.target = enemy.pos;
     enemy.vel = gs_vec2_ctor(0,0);
@@ -87,11 +96,6 @@ void init()
         makeUnit(4);
     }
 
-}
-float get_distance(gs_vec2 a, gs_vec2 b){
-    f32 xDelta = (a.x-b.x);
-    f32 yDelta = (a.y-b.y);
-    return sqrt(xDelta*xDelta + yDelta*yDelta);
 }
 f32 bounce_velocity = 20.f;
 void add_velocity_away(Unit* forUnit, gs_vec2 from){
@@ -163,7 +167,6 @@ bool moveToTarget(gs_vec2* self, gs_vec2 target, int speed) {
     // Haven't yet reached target
     return false;
 }
-int agro_radius = 300;
 void update()
 {
     if (gs_platform_key_pressed(GS_KEYCODE_ESC)) gs_engine_quit();
