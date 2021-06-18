@@ -34,7 +34,7 @@ float lerp(float t, float a, float b ){
     return (1-t)*a + t*b;
 }
 gs_vec2 camPos = {0,0};
-gs_vec2 get_point_between_bounds(gs_vec2 origin){
+gs_vec2 get_point_between_bounds(){
     float x = lerp(stb_frand(), arena_upper_left.x, arena_lower_right.x);
     float y = lerp(stb_frand(), arena_upper_left.y, arena_lower_right.y);
     return gs_vec2_ctor(x,y);
@@ -43,7 +43,7 @@ gs_vec2 get_point_between_bounds(gs_vec2 origin){
 makeUnit(short t){
     f32 spawn_radius = 1000.f;
     Unit enemy;
-    enemy.pos = gs_vec2_ctor(stb_frand()*spawn_radius,stb_frand()*spawn_radius);
+    enemy.pos = get_point_between_bounds();
     enemy.type = t;
     enemy.target = enemy.pos;
     enemy.vel = gs_vec2_ctor(0,0);
@@ -260,7 +260,7 @@ void update()
         bool reachedTarget = moveToTarget(&e->pos, e->target, enemySpeed);
         if(reachedTarget){
             // Pick random wander target:
-            e->target = get_point_between_bounds(e->pos);
+            e->target = get_point_between_bounds();
         }
         // Test collisions with hero:
         if(areUnitsColliding(e, &hero)){
