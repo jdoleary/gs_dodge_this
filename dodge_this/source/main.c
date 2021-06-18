@@ -15,6 +15,9 @@ float speed = 10.f;
 f32 unit_size = 50.f;
 int score = 0;
 
+enum gameStates{Pre, Playing} gameState;
+gameState = Pre;
+
 #define arena_size 1000
 gs_vec2 arena_upper_left = {-arena_size, -arena_size};
 gs_vec2 arena_lower_right = {arena_size,arena_size};
@@ -87,9 +90,9 @@ void init()
     }
 
 }
-float get_distance(gs_vec2* a, gs_vec2* b){
-    f32 xDelta = (a->x-b->x);
-    f32 yDelta = (a->y-b->y);
+float get_distance(gs_vec2 a, gs_vec2 b){
+    f32 xDelta = (a.x-b.x);
+    f32 yDelta = (a.y-b.y);
     return sqrt(xDelta*xDelta + yDelta*yDelta);
 }
 f32 bounce_velocity = 20.f;
@@ -128,14 +131,14 @@ void use_velocity(Unit* unit){
 
 }
 bool areUnitsColliding(Unit* a, Unit* b){
-    if(get_distance(&a->pos, &b->pos) <= unit_size*2){
+    if(get_distance(a->pos, b->pos) <= unit_size*2){
         return true;
     }
     return false;
 
 }
 void moveToTargetDynamicSpeed(gs_vec2* self, gs_vec2 target) {
-    float speed = gs_interp_linear(0.f,20.f, get_distance(self, &target)/300.f);
+    float speed = gs_interp_linear(0.f,20.f, get_distance(*self, target)/300.f);
     float bigA = target.x - self->x;
     float bigB = target.y - self->y;
     double bigC = sqrt(bigA*bigA + bigB*bigB);
@@ -167,6 +170,8 @@ void update()
 {
     if (gs_platform_key_pressed(GS_KEYCODE_ESC)) gs_engine_quit();
 
+
+
 	gs_vec2 screenSize = gs_platform_window_sizev(gs_platform_main_window());
 
     camPos = gs_vec2_mul(hero.pos, gs_v2(-1,-1));
@@ -197,6 +202,12 @@ void update()
 
     const gs_vec2 screenMousePos = gs_platform_mouse_positionv();
     const gs_vec2 objectiveMousePos = gs_vec2_sub(screenMousePos, camPos);
+    if(gameState == Pre){
+        // When user hovers mouse over hero, start the game
+        if(get_distance(objectiveMousePos, hero.pos) <= unit_size){
+            gameState = Playing;
+        }
+    }
 
    
     gsi_push_matrix(&gsi, GSI_MATRIX_MODELVIEW);
@@ -226,7 +237,7 @@ void update()
             r = 255;
             g = 100;
             enemySpeed = 2;
-            if(get_distance(&e->pos, &hero.pos) < agro_radius){
+            if(get_distance(e->pos, hero.pos) < agro_radius){
                 e->target = hero.pos;
                 g = 0;
                 enemySpeed = 4;
@@ -235,7 +246,7 @@ void update()
             case 3:
             // Fleer
             b = 255;
-            if(get_distance(&e->pos, &hero.pos) < agro_radius){
+            if(get_distance(e->pos, hero.pos) < agro_radius){
                 // Run away from hero
                 e->target = gs_vec2_sub(e->pos, gs_vec2_sub(hero.pos, e->pos));
                 b = 255;
@@ -248,7 +259,7 @@ void update()
             case 4:
             // Mimic
             b = 255;
-            if(get_distance(&e->pos, &hero.pos) < agro_radius){
+            if(get_distance(e->pos, hero.pos) < agro_radius){
                 // Chase hero
                 e->target = hero.pos;
                 // Turn red
@@ -258,42 +269,47 @@ void update()
             }
             break;
         }
-        bool reachedTarget = moveToTarget(&e->pos, e->target, enemySpeed);
-        if(reachedTarget){
-            // Pick random wander target:
-            e->target = get_point_between_bounds();
-        }
-        // Test collisions with hero:
-        if(areUnitsColliding(e, &hero)){
-            if(e->type == 3){
-                // Fleer
-                hero_health += 1;
-                // Gain score
-                score++;
-                // Cap health at no greater than max
-                if(hero_health >= HERO_MAX_HEALTH){
-                    hero_health = HERO_MAX_HEALTH;
-                }
-                // "Respawn" fleer on opposize size of map:
-                e->pos.x = -e->pos.x;
-                e->pos.y = -e->pos.y;
-            }else {
-                hero_health -= 1;
-                add_velocity_away(&hero, e->pos);
-                add_velocity_away(e, hero.pos);
 
+        if(gameState == Playing){
+            bool reachedTarget = moveToTarget(&e->pos, e->target, enemySpeed);
+            if(reachedTarget){
+                // Pick random wander target:
+                e->target = get_point_between_bounds();
             }
+            // Test collisions with hero:
+            if(areUnitsColliding(e, &hero)){
+                if(e->type == 3){
+                    // Fleer
+                    hero_health += 1;
+                    // Gain score
+                    score++;
+                    // Cap health at no greater than max
+                    if(hero_health >= HERO_MAX_HEALTH){
+                        hero_health = HERO_MAX_HEALTH;
+                    }
+                    // "Respawn" fleer on opposize size of map:
+                    e->pos.x = -e->pos.x;
+                    e->pos.y = -e->pos.y;
+                }else {
+                    hero_health -= 1;
+                    add_velocity_away(&hero, e->pos);
+                    add_velocity_away(e, hero.pos);
+
+                }
+            }
+            use_velocity(e);
         }
-        use_velocity(e);
 
         gsi_circle(&gsi, e->pos.x, e->pos.y, unit_size, 20, r, g, b, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     }
 
     // HERO
     // Move hero to pointer
-    moveToTargetDynamicSpeed(&hero.pos, objectiveMousePos);
-    doArenaBorderCollisions(&hero);
-    use_velocity(&hero);
+    if(gameState == Playing){
+        moveToTargetDynamicSpeed(&hero.pos, objectiveMousePos);
+        doArenaBorderCollisions(&hero);
+        use_velocity(&hero);
+    }
     // Draw hero
     gsi_circle(&gsi, hero.pos.x, hero.pos.y, unit_size+5, 20, 255, 255, 255, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     gsi_circle(&gsi, hero.pos.x, hero.pos.y, unit_size, 20, 0, 0, 0, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
@@ -302,16 +318,30 @@ void update()
 
     gsi_pop_matrix(&gsi);
 
-    // Print score to screen
-    {
-        gsi_push_matrix(&gsi, GSI_MATRIX_MODELVIEW);
-        gsi_scalef(&gsi, 2.f, 2.f, 2.f);
+    if(gameState == Pre){
+            // Print Instructions 
+            {
+                gsi_push_matrix(&gsi, GSI_MATRIX_MODELVIEW);
+                gsi_scalef(&gsi, 2.f, 2.f, 1.f);
 
-        char buf[12];
-        snprintf(buf, 12, "Score: %d", score);
-        gsi_text(&gsi, 10.f, 20.f, buf, NULL, false, 255, 255, 255, 255);
+                gsi_text(&gsi, 10.f, 20.f, "Hover over the green circle to begin", NULL, false, 255, 255, 255, 255);
 
-        gsi_pop_matrix(&gsi);
+                gsi_pop_matrix(&gsi);
+            }
+
+    }else {
+
+        // Print score to screen
+        {
+            gsi_push_matrix(&gsi, GSI_MATRIX_MODELVIEW);
+            gsi_scalef(&gsi, 2.f, 2.f, 2.f);
+
+            char buf[12];
+            snprintf(buf, 12, "Score: %d", score);
+            gsi_text(&gsi, 10.f, 20.f, buf, NULL, false, 255, 255, 255, 255);
+
+            gsi_pop_matrix(&gsi);
+        }
     }
 
     gsi_render_pass_submit(&gsi, &cb, gs_color(10, 10, 10, 255));
