@@ -77,20 +77,29 @@ float get_distance(gs_vec2* a, gs_vec2* b){
     f32 yDelta = (a->y-b->y);
     return sqrt(xDelta*xDelta + yDelta*yDelta);
 }
-f32 bounce_velocity = 4.f;
-void add_velocity_if_out_of_arena(Unit* unit){
-    if(unit->pos.x > arena_size){
-        unit->vel.x -= bounce_velocity;
-    } 
-    if(unit->pos.x < -arena_size ){
-        unit->vel.x += bounce_velocity;
+f32 bounce_velocity = 8.f;
+void add_velocity_away(Unit* forUnit, gs_vec2 from){
+    float bigA = from.x - forUnit->pos.x;
+    float bigB = from.y - forUnit->pos.y;
+    double bigC = sqrt(bigA*bigA + bigB*bigB);
+    float a = bigA/bigC;
+    float b = bigB/bigC;
+    forUnit->vel.x -= a*bounce_velocity;
+    forUnit->vel.y -= b*bounce_velocity;
 
+}
+void doArenaBorderCollisions(Unit* unit){
+    if(unit->pos.x > arena_size){
+        unit->pos.x = arena_size;
+    } 
+    if(unit->pos.x < -arena_size){
+        unit->pos.x = -arena_size;
     }
     if(unit->pos.y > arena_size){
-        unit->vel.y -= bounce_velocity;
+        unit->pos.y = arena_size;
     } 
     if(unit->pos.y < -arena_size){
-        unit->vel.y += bounce_velocity;
+        unit->pos.y = -arena_size;
     }
 }
 // Reduces velocity per tick
@@ -241,13 +250,18 @@ void update()
                 e->target = get_point_within_distance(e->pos, 1000);
             }
         }
+        // Test collisions with hero:
+        if(areUnitsColliding(e, &hero)){
+            add_velocity_away(&hero, e->pos);
+        }
+
         gsi_circle(&gsi, e->pos.x, e->pos.y, unit_size, 20, r, g, b, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     }
 
     // HERO
     // Move hero to pointer
     moveToTargetDynamicSpeed(&hero.pos, objectiveMousePos);
-    add_velocity_if_out_of_arena(&hero);
+    doArenaBorderCollisions(&hero);
     use_velocity(&hero);
     // Draw hero
     gsi_circle(&gsi, hero.pos.x, hero.pos.y, unit_size, 20, 0, 255, 0, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
