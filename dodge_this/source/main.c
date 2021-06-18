@@ -88,10 +88,10 @@ void init()
     
 
     // Init enemies
-    int number_of_wanderers = 10;
-    int number_of_chasers = 4;
-    int number_of_fleers = 7;
-    int number_of_mimics = 1;
+    int number_of_wanderers = 0;
+    int number_of_chasers = 0;
+    int number_of_fleers = 1;
+    int number_of_mimics = 0;
     for(int i = 0; i < number_of_wanderers; i++){
         makeUnit(1);
     }
@@ -105,6 +105,18 @@ void init()
         makeUnit(4);
     }
 
+}
+void make_random_unit(){
+    float rand = stb_frand();
+    if(rand < 0.1){
+        makeUnit(4);
+    }else if(rand < 0.3){
+        makeUnit(2);
+    }else if (rand < 0.5){
+        makeUnit(3);
+    }else {
+        makeUnit(1);
+    }
 }
 f32 bounce_velocity = 20.f;
 void add_velocity_away(Unit* forUnit, gs_vec2 from){
@@ -293,6 +305,8 @@ void update()
                     hero_health += 1;
                     // Gain score
                     score++;
+                    // Add another unit:
+                    make_random_unit();
                     // Cap health at no greater than max
                     if(hero_health >= HERO_MAX_HEALTH){
                         hero_health = HERO_MAX_HEALTH;
@@ -305,7 +319,7 @@ void update()
                     gs_audio_play_source(ap->hndl, 0.5f);
                 }else {
                     hero_health -= 1;
-                    add_velocity_away(&hero, e->pos);
+                    // add_velocity_away(&hero, e->pos);
                     add_velocity_away(e, hero.pos);
 
                 }
