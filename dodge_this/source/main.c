@@ -27,10 +27,16 @@ typedef struct {
 
 gs_dyn_array(Unit) enemies = NULL;
 Unit hero;
+
+float lerp(float t, float a, float b ){
+    return (1-t)*a + t*b;
+}
 gs_vec2 camPos = {0,0};
-gs_vec2 get_point_within_distance(gs_vec2 origin, int distance){
-    gs_vec2 point = gs_vec2_ctor(stb_frand()*distance*2-distance,stb_frand()*distance*2-distance);
-    return gs_vec2_add(origin, point);
+gs_vec2 get_point_between_bounds(gs_vec2 origin){
+    float x = lerp(stb_frand(), arena_upper_left.x, arena_lower_right.x);
+    float y = lerp(stb_frand(), arena_upper_left.y, arena_lower_right.y);
+    return gs_vec2_ctor(x,y);
+
 }
 makeUnit(short t){
     f32 spawn_radius = 1000.f;
@@ -221,7 +227,7 @@ void update()
         if(reachedTarget){
             if(e->type == 1){
                 // Pick random wander target:
-                e->target = get_point_within_distance(e->pos, 1000);
+                e->target = get_point_between_bounds(e->pos);
             }
         }
         // Test collisions with hero:
