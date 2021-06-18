@@ -27,6 +27,8 @@ typedef struct {
 
 gs_dyn_array(Unit) enemies = NULL;
 Unit hero;
+#define HERO_MAX_HEALTH 10
+int hero_health = HERO_MAX_HEALTH;
 
 float lerp(float t, float a, float b ){
     return (1-t)*a + t*b;
@@ -232,6 +234,7 @@ void update()
         }
         // Test collisions with hero:
         if(areUnitsColliding(e, &hero)){
+            hero_health -= 1;
             add_velocity_away(&hero, e->pos);
             add_velocity_away(e, hero.pos);
         }
@@ -246,7 +249,9 @@ void update()
     doArenaBorderCollisions(&hero);
     use_velocity(&hero);
     // Draw hero
-    gsi_circle(&gsi, hero.pos.x, hero.pos.y, unit_size, 20, 0, 255, 0, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
+    gsi_circle(&gsi, hero.pos.x, hero.pos.y, unit_size+5, 20, 255, 255, 255, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
+    gsi_circle(&gsi, hero.pos.x, hero.pos.y, unit_size, 20, 0, 0, 0, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
+    gsi_circle(&gsi, hero.pos.x, hero.pos.y, unit_size*hero_health/HERO_MAX_HEALTH, 20, 0, 255, 0, 255, GS_GRAPHICS_PRIMITIVE_TRIANGLES);
     // gs_println("hero pos: %f, %f", heroPos.x, heroPos.y);
 
     gsi_pop_matrix(&gsi);
