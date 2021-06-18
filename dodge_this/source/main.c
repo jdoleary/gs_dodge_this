@@ -13,6 +13,7 @@ gs_asset_texture_t   tex  = {0};
 double duration = 0;
 float speed = 10.f;
 f32 unit_size = 50.f;
+int score = 0;
 
 #define arena_size 1000
 gs_vec2 arena_upper_left = {-arena_size, -arena_size};
@@ -267,6 +268,8 @@ void update()
             if(e->type == 3){
                 // Fleer
                 hero_health += 1;
+                // Gain score
+                score++;
                 // Cap health at no greater than max
                 if(hero_health >= HERO_MAX_HEALTH){
                     hero_health = HERO_MAX_HEALTH;
@@ -298,6 +301,19 @@ void update()
     // gs_println("hero pos: %f, %f", heroPos.x, heroPos.y);
 
     gsi_pop_matrix(&gsi);
+
+    // Print score to screen
+    {
+        gsi_push_matrix(&gsi, GSI_MATRIX_MODELVIEW);
+        gsi_scalef(&gsi, 2.f, 2.f, 2.f);
+
+        char buf[12];
+        snprintf(buf, 12, "Score: %d", score);
+        gsi_text(&gsi, 10.f, 20.f, buf, NULL, false, 255, 255, 255, 255);
+
+        gsi_pop_matrix(&gsi);
+    }
+
     gsi_render_pass_submit(&gsi, &cb, gs_color(10, 10, 10, 255));
     // Submit command buffer (syncs to GPU, MUST be done on main thread where you have your GPU context created)
     gs_graphics_submit_command_buffer(&cb);
