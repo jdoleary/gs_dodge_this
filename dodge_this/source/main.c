@@ -232,9 +232,22 @@ void update()
         }
         // Test collisions with hero:
         if(areUnitsColliding(e, &hero)){
-            hero_health -= 1;
-            add_velocity_away(&hero, e->pos);
-            add_velocity_away(e, hero.pos);
+            if(e->type == 3){
+                // Fleer
+                hero_health += 1;
+                // Cap health at no greater than max
+                if(hero_health >= HERO_MAX_HEALTH){
+                    hero_health = HERO_MAX_HEALTH;
+                }
+                // "Respawn" fleer on opposize size of map:
+                e->pos.x = -e->pos.x;
+                e->pos.y = -e->pos.y;
+            }else {
+                hero_health -= 1;
+                add_velocity_away(&hero, e->pos);
+                add_velocity_away(e, hero.pos);
+
+            }
         }
         use_velocity(e);
 
